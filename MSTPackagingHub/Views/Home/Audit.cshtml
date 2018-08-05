@@ -1,0 +1,77 @@
+﻿
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-md">
+        <table class="table table-striped table-bordered dt-responsive nowrap" id="scripts-table" style="width:100%;"></table>
+    </div>
+</div>
+@section scripts {
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.8.6/showdown.min.js"></script>
+    <script src="~/Scripts/highlight.pack.js"></script>
+    <script>
+        let converter = new showdown.Converter();
+        $('#scripts-table').DataTable
+            ({
+                "responsive": true,
+                "columnDefs": [
+                    {
+                        "title": "Name",
+                        "targets": [0],
+                    },
+                    {
+                        "title": "FullName",
+                        "targets": [1]
+                    },
+                    {
+                        "title": "Text",
+                        "className": "script-text",
+                        "render": function (data, type, row) {
+                            return "<pre><code class='perl hljs'>" + data + "</code></pre>";
+                        },
+                        "targets": [2],
+                    },
+                ],
+                "language":
+                    {
+                        "processing": "<div class='overlay custom-loader-background'><i class='fa fa-cog fa-spin custom-loader-color'></i></div>"
+                    },
+                "ajax":
+                    {
+                        "url": "/api/Values",
+                        "type": "GET",
+                        "dataType": "JSON",
+                        "dataSrc": function (xmldata) {
+                            return xmldata;
+                        }
+                    },
+                "columns": [
+                    {
+                        "data": "Name"
+                    },
+                    {
+                        "data": "FullName"
+                    },
+                    {
+                        "data": "Text"
+                    }
+                ]
+            }).on('responsive-display', function (e, datatable, row, showHide, update) {
+                if (typeof row.selector.rows[0] !== 'undefined') {
+                    $(row.selector.rows[0].nextSibling).find('li[data-dt-column="2"]').addClass('script-text');
+                    $(row.selector.rows[0].nextSibling).find('pre code').each(function (i, block) {
+                        hljs.highlightBlock(block);
+                    });
+                }
+            }).on('responsive-resize', function (e, datatable, columns) {
+                $(columns).find('li[data-dt-column="2"]').addClass('script-text');
+                $(columns).find('pre code').each(function (i, block) {
+                    hljs.highlightBlock(block);
+                });
+            });
+    </script>
+}

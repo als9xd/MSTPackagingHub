@@ -1,0 +1,7 @@
+﻿td.script-text {
+    white-space: pre;
+}
+
+.script-text > .dtr-data {
+    white-space: pre;
+}
