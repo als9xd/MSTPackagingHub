@@ -20,16 +20,20 @@ namespace MSTPackagingHub.Controllers
             _packageScraperService = packageScraperService;
         }
 
-        // GET api/<controller>
-        public List<PackageScraperService.Script> Get()
-        {
-            return _packageScraperService.GetLoadedScripts();
-        }
-
         // GET api/<controller>/5
-        public string Get(int id)
+        public List<PackageScraperService.Package.Script> Get(string os = null, string author = null)
         {
-            return "value";
+            List<PackageScraperService.Package.Script> _scripts = _packageScraperService.GetScripts();
+            if (os != null)
+            {
+                _scripts = _scripts.Where(s => s.OSVer == os).ToList();
+            }
+            if (author != null)
+            {
+                _scripts = _scripts.Where(s => s.Authors.ToLower().Contains(author.ToLower())).ToList();
+            }
+
+            return _scripts;
         }
 
         // POST api/<controller>

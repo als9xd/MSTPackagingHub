@@ -1,7 +1,12 @@
-﻿td.script-text {
-    white-space: pre;
+﻿td.readme-text {
+    white-space: pre-wrap !important;
 }
 
-.script-text > .dtr-data {
-    white-space: pre;
+.readme-text > .dtr-data {
+    white-space: pre-wrap !important;
 }
+
+.readme-text pre, xmp, plaintext, listing {
+    white-space: pre-wrap;
+}
+

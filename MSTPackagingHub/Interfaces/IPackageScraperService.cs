@@ -7,7 +7,6 @@ namespace MSTPackagingHub.Interfaces
 {
     public interface IPackageScraper
     {
-        List<PackageScraperService.Script> GetLoadedScripts();
-        string GetLoadedScriptsJSON();
+        List<PackageScraperService.Package.Script> GetScripts();
     }
 }

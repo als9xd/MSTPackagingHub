@@ -20,35 +20,82 @@
             $.fn.dataTable.moment('dddd, MMMM Do, YYYY');
             $('#scripts-table').DataTable({
                 "responsive": true,
+                "autoWidth":false, 
                 "columnDefs": [
                     {
-                        "title": "Name",
+                        "title": "PackageID",
                         "targets": [0],
                     },
                     {
-                        "title": "Creation Time",
+                        "title": "Environment",
+                        "targets": [1],
+                    },
+                    {
+                        "title": "OS",
+                        "targets": [2],
+                        "render": function (data, type, row) {
+                            let url = new URL(location.href);
+                            url.searchParams.set('os', data);
+                            return "<a href=" + url + ">"+data + "</a>";
+                        }
+                    },
+                    {
+                        "title": "Authors",
+                        "targets": [3],
+                        "render": function (data, type, row) {
+                            let authors_split = data.split(',');
+                            let authors_html = "";
+                            if (authors_split.length === 1 && authors_split[0] === "") {
+                                return authors_html;
+                            }
+                            for (let i = 0; i < authors_split.length; i++) {
+                                authors_split[i] = authors_split[i].trim();
+                                if (authors_split[i] !== "") {
+                                    let url = new URL(location.href);
+                                    url.searchParams.set('author', authors_split[i]);
+                                    authors_html += "<li><a href='" + url + "'>" + authors_split[i] + "</a></li>";
+                                }
+                            }
+                            return "<ul>" + authors_html + "</ul>";
+                        }
+                    },
+                    {
+                        "title": "File Name",
+                        "targets": [4],
+                    },
+                    {
+                        "title": "Created",
                         "render": function (data, type, row) {
                             return moment(data).format('dddd, MMMM Do, YYYY');
                         },
-                        "targets": [1]
+                        "targets": [5]
                     },
                     {
                         "title": "Last Modified",
                         "render": function (data, type, row) {
                             return moment(data).format('dddd, MMMM Do, YYYY');
                         },
-                        "targets": [2]
+                        "targets": [6]
                     },
                     {
                         "title": "Path",
+                        "targets": [7]
+                    },
+                    {
+                        "title": "Readme",
+                        "className": "readme-text",
+                        "render": function (data, type, row) {
+                            let readmes = JSON.parse(unescape(data));
+                            return "<pre><code class='markdown hljs'>" + readmes.join("<hr>") + "</code></pre>";
+                        },
+                        "targets": [8],
                     },
                     {
                         "title": "Contents",
-                        "className": "script-text",
                         "render": function (data, type, row) {
                             return "<pre><code class='perl hljs'>" + data + "</code></pre>";
                         },
-                        "targets": [4],
+                        "targets": [9],
                     },
                 ],
                 "language":
@@ -57,17 +104,28 @@
                     },
                 "ajax":
                     {
-                        "url": "/api/Packages",
+                        "url": "/api/Packages?" + (new URL(location)).searchParams,
                         "type": "GET",
                         "dataType": "JSON",
                         "dataSrc": function (xmldata) {
-                            console.log(xmldata);
                             return xmldata;
                         }
                     },
                 "columns": [
                     {
-                        "data": "Name"
+                        "data": "PackageID"
+                    },
+                    {
+                        "data": "Environment"
+                    },
+                    {
+                        "data": "OSVer"
+                    },
+                    {
+                        "data": "Authors"
+                    },
+                    {
+                        "data": "FileName"
                     },
                     {
                         "data": "CreationTime"
@@ -76,25 +134,33 @@
                         "data": "LastWriteTime"
                     },
                     {
-                        "data": "FullName"
+                        "data": "Path"
+                    },
+                    {
+                        "data": "Info"
                     },
                     {
                         "data": "Text"
                     }
+
                 ]
             }).on('responsive-display', function (e, datatable, row, showHide, update) {
                 if (typeof row.selector.rows[0] !== 'undefined') {
-                    $(row.selector.rows[0].nextSibling).find('li[data-dt-column="2"]').addClass('script-text');
+                    $(row.selector.rows[0].nextSibling).find('li[data-dt-column="8"]').addClass('readme-text');
                     $(row.selector.rows[0].nextSibling).find('pre code').each(function (i, block) {
                         hljs.highlightBlock(block);
                     });
+                    datatable.responsive.recalc();
                 }
             }).on('responsive-resize', function (e, datatable, columns) {
-                $(columns).find('li[data-dt-column="2"]').addClass('script-text');
+                $(columns).find('li[data-dt-column="8"]').addClass('readme-text');
                 $(columns).find('pre code').each(function (i, block) {
                     hljs.highlightBlock(block);
                 });
-            });
+                datatable.responsive.recalc();
+                });
+            $("thead tr").css("border-bottom", "5px solid #000");
+
         });
     </script>
 }

@@ -14,33 +14,49 @@ using System.Data;
 using System.Data.SQLite;
 using Dapper;
 
+using System.Text.RegularExpressions;
+
 namespace MSTPackagingHub.Services
 {
     public class PackageScraperService : IPackageScraper
     {
         private class SqliteDataAccess
         {
-            public static List<Script> LoadScripts()
+            public static List<Package.Script> LoadScripts()
             {
                 using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
                 {
-                    var output = cnn.Query<Script>("select * from Script", new DynamicParameters());
+                    var output = cnn.Query<Package.Script>("select * from Script", new DynamicParameters());
                     return output.ToList();
                 }
             }
 
-            public static void SaveScript(Script script)
+            public static void SaveScript(Package.Script script)
             {
                 using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
                 {
 
-                    cnn.Execute(@"insert into Script 
-                                    (FullName, CreationTime, CreationTimeUtc, Extension, 
-                                    LastAccessTime, LastAccessTimeUtc, LastWriteTime, LastWriteTimeUtc, Length, Name, Text)
+                    cnn.Execute(@"insert into Script
+                                    (PackageId, OSVer, Environment, FileName, Authors, Path, Text, Info, CreationTime, CreationTimeUtc, LastAccessTime, LastAccessTimeUtc, LastWriteTime, LastWriteTimeUtc)
                                 values
-                                    (@FullName, @CreationTime, @CreationTimeUtc, @Extension, 
-                                    @LastAccessTime, @LastAccessTimeUtc, @LastWriteTime, @LastWriteTimeUtc, @Length, @Name, @Text)
-                    ", script);
+                                    (@PackageId, @OSVer, @Environment, @FileName, @Authors, @Path, @Text, @Info, @CreationTime, @CreationTimeUtc, @LastAccessTime, @LastAccessTimeUtc, @LastWriteTime, @LastWriteTimeUtc)
+                    ", new
+                    {
+                        PackageID = script.PackageID,
+                        OSVer = script.OSVer,
+                        Environment = script.Environment,
+                        FileName = script.FileName,
+                        Authors = script.Authors,
+                        Path = script.Path,
+                        Text = script.Text,
+                        Info = script.Info,
+                        CreationTime = script.CreationTime,
+                        CreationTimeUtc = script.CreationTimeUtc,
+                        LastAccessTime = script.LastAccessTime,
+                        LastAccessTimeUtc = script.LastAccessTimeUtc,
+                        LastWriteTime = script.LastWriteTime,
+                        LastWriteTimeUtc = script.LastWriteTimeUtc,
+                    });
                 }
             }
 
@@ -49,173 +65,265 @@ namespace MSTPackagingHub.Services
                 return ConfigurationManager.ConnectionStrings[id].ConnectionString;
             }
         }
-        
-        private void SerializeScripts<T>(T serializableObject, string fileName)
-        {
-            if (serializableObject == null) { return; }
 
-            XmlDocument xmlDocument = new XmlDocument();
-            XmlSerializer serializer = new XmlSerializer(serializableObject.GetType());
-            using (MemoryStream stream = new MemoryStream())
+        public class Package
+        {
+            public class Script
             {
-                serializer.Serialize(stream, serializableObject);
-                stream.Position = 0;
-                xmlDocument.Load(stream);
-                xmlDocument.Save(fileName);
-                stream.Close();
-            }
-        }
+                public string PackageID { get; set; }
+                public string OSVer { get; set; }
+                public string Environment { get; set; }
 
-        public T DeSerializeScripts<T>(string fileName)
-        {
-            if (string.IsNullOrEmpty(fileName)) { return default(T); }
+                public string Authors { get; set; }
+                public string FileName { get; set; }
+                public string Path { get; set; }
+                public long Length { get; set; }
+                public string Extension { get; set; }
+                public DateTime CreationTime { get; set; }
+                public DateTime CreationTimeUtc { get; set; }
+                public DateTime LastWriteTime { get; set; }
+                public DateTime LastWriteTimeUtc { get; set; }
+                public DateTime LastAccessTime { get; set; }
+                public DateTime LastAccessTimeUtc { get; set; }
 
-            T objectOut = default(T);
+                public string Text { get; set; }
+                public string Info { get; set; }
 
-            XmlDocument xmlDocument = new XmlDocument();
-            xmlDocument.Load(fileName);
-            string xmlString = xmlDocument.OuterXml;
-
-            using (StringReader read = new StringReader(xmlString))
-            {
-                Type outType = typeof(T);
-
-                XmlSerializer serializer = new XmlSerializer(outType);
-                using (XmlReader reader = new XmlTextReader(read))
+                public static List<Script> FindScripts(string dir,int maxDepth)
                 {
-                    objectOut = (T)serializer.Deserialize(reader);
-                    reader.Close();
-                }
-
-                read.Close();
-            }
-
-            return objectOut;
-        }
-
-
-        public class Script
-        {
-            public string Name { get; set; }
-            public string FullName { get; set; }
-            public long Length { get; set; }
-            public string Extension { get; set; }
-            public DateTime CreationTime { get; set; }
-            public DateTime CreationTimeUtc { get; set; }
-            public DateTime LastWriteTime { get; set; }
-            public DateTime LastWriteTimeUtc { get; set; }
-            public DateTime LastAccessTime { get; set; }
-            public DateTime LastAccessTimeUtc { get; set; }
-
-            public string Text { get; set; }
-        }
-
-        private List<string> Directories = new List<string>();
-
-        public List<Script> Scripts;
-
-        public bool SetDirectories(string[] dirs)
-        {
-            foreach (string dir in dirs)
-            {
-                if (!Directory.Exists(dir))
-                {
-                    throw new System.IO.DirectoryNotFoundException($"Could not find directory at { dir }");
-                }
-                else
-                {
-                    Directories.Add(dir);
-                }
-
-            }
-            return true;
-        }
-
-        public List<Script> GetScripts()
-        {
-            List<FileInfo> FindFiles(List<FileInfo> results, string dir, int depth)
-            {
-                try
-                {
-                    results.AddRange(new DirectoryInfo(dir).GetFiles("*.pl"));
-                }
-                catch (System.UnauthorizedAccessException) { }
-
-                if (depth > 1)
-                {
-                    try
+                    List<FileInfo> FindFiles(List<FileInfo> results, string curDir, int depth)
                     {
-                        foreach (DirectoryInfo d in new DirectoryInfo(dir).GetDirectories())
+                        try
                         {
-                            FindFiles(results, d.FullName, depth - 1);
+                            results.AddRange(new DirectoryInfo(curDir).GetFiles("*.pl"));
+                        }
+                        catch (System.UnauthorizedAccessException) { }
+
+                        if (depth > 1)
+                        {
+                            try
+                            {
+                                foreach (DirectoryInfo d in new DirectoryInfo(curDir).GetDirectories())
+                                {
+                                    FindFiles(results, d.FullName, depth - 1);
+                                }
+                            }
+                            catch (System.UnauthorizedAccessException) { }
+
+                        }
+                        return results;
+                    }
+
+                    List<Script> scripts = new List<Script>();
+
+                    List<FileInfo> fsis = FindFiles(new List<FileInfo>(), dir, maxDepth);
+
+                    foreach (FileInfo fsi in fsis)
+                    {
+                        string text = File.ReadAllText(fsi.FullName);
+                        Regex commentBlocksR = new Regex(@"\=pod(?:(?:(?!\=pod))|(?:[^\*]))*\=cut|\/\/[^\n\r]*(?=[\n\r])", RegexOptions.Multiline);
+                        MatchCollection commentBlocks = commentBlocksR.Matches(text);
+                        Regex commentLinesR = new Regex(@"#(.*)", RegexOptions.Multiline);
+                        MatchCollection commentLines = commentLinesR.Matches(text);
+
+                        Dictionary<string, string> authors = new Dictionary<string, string>();
+
+                        using (var reader = new StreamReader(@"C:\Users\t-als9xd\source\repos\MSTPackagingHub\MSTPackagingHub\CSV_Database_of_First_Names.csv"))
+                        {
+                            List<string> firstNames = new List<string>();
+                            while (!reader.EndOfStream)
+                            {
+                                firstNames.Add(reader.ReadLine().Trim());
+                            }
+
+                            foreach (Match m in commentLines)
+                            {
+                                foreach (string firstName in firstNames)
+                                {
+                                    Regex firstNameExistsR = new Regex(firstName + @"\s", RegexOptions.Multiline);
+                                    var test = m.ToString();
+                                    var nMatches = firstNameExistsR.Matches(m.ToString());
+
+                                    if(m.Length != 0)
+                                    {
+                                        Regex firstNameR = new Regex(firstName + @"\s([A-Z][a-z]*\.?)?\s?([A-Z][a-z]*\,?)?\s?", RegexOptions.Multiline);
+                                        MatchCollection fNameMatches = firstNameR.Matches(m.ToString());
+
+                                        foreach (Match fnm in fNameMatches)
+                                        {
+                                            string fNameResult = fnm.ToString().Replace("\n", "").Replace("\r", "").Trim();
+                                            authors[firstName] = fNameResult;
+                                        }
+                                    }
+                                }
+
+                            }
+
+                            string joinedAuthors = string.Join(", ", authors.Select(x => x.Value));
+
+                            List<string> readmeInfo = new List<string>();
+                            List<FileInfo> readmeFsis = new List<FileInfo>();
+                            readmeFsis.AddRange(new DirectoryInfo(fsi.Directory.ToString()).GetFiles("readme*"));
+                            readmeFsis.AddRange(new DirectoryInfo(fsi.Directory.ToString()).Parent.GetFiles("readme*"));
+                            if (readmeFsis.Count() != 0)
+                            {
+                                readmeInfo.Add(HttpUtility.JavaScriptStringEncode(File.ReadAllText(readmeFsis[0].FullName),true));
+                            }
+
+                            Script script = new Script
+                            {
+                                Authors = joinedAuthors,
+                                FileName = fsi.Name,
+                                Path = fsi.FullName,
+                                Length = fsi.Length,
+                                Extension = fsi.Extension,
+                                CreationTime = fsi.CreationTime,
+                                CreationTimeUtc = fsi.CreationTimeUtc,
+                                LastWriteTime = fsi.LastWriteTime,
+                                LastWriteTimeUtc = fsi.LastWriteTimeUtc,
+                                LastAccessTime = fsi.LastAccessTime,
+                                LastAccessTimeUtc = fsi.LastAccessTimeUtc,
+                                Text = text,
+                                Info = $"[{String.Join(",",readmeInfo.ToArray())}]"
+                            };
+                            string[] scriptPath = script.Path.Split(System.IO.Path.DirectorySeparatorChar);
+
+                            Dictionary<string, int> dirAttrIndexes = Package.FindPackageDirAttrs(scriptPath);
+
+                            Package.Script scriptObj = new Package.Script
+                            {
+                                PackageID = scriptPath[dirAttrIndexes["PackageID"]],
+                                OSVer = scriptPath[dirAttrIndexes["OSVer"]],
+                                Environment = dirAttrIndexes.ContainsKey("Environment") ? scriptPath[dirAttrIndexes["Environment"]] : null,
+                                FileName = script.FileName,
+                                Authors = script.Authors,
+                                Path = script.Path,
+                                Text = script.Text,
+                                Info = script.Info,
+                                CreationTime = script.CreationTime,
+                                CreationTimeUtc = script.CreationTimeUtc,
+                                LastAccessTime = script.LastAccessTime,
+                                LastAccessTimeUtc = script.LastAccessTimeUtc,
+                                LastWriteTime = script.LastWriteTime,
+                                LastWriteTimeUtc = script.LastWriteTimeUtc,
+                            };
+
+                            SqliteDataAccess.SaveScript(scriptObj);
+
                         }
                     }
-                    catch (System.UnauthorizedAccessException) { }
-
+                
+                    return scripts;
                 }
-                return results;
+
             }
 
-            List<Script> _scripts = new List<Script>();
+            public static Dictionary<string, int> FindPackageDirAttrs(string[] dirs){
+                int dirLen = dirs.Count();
 
-            foreach (string dir in Directories)
-            {
-                List<FileInfo> fsis = FindFiles(new List<FileInfo>(), dir, 4);
-
-                foreach (FileInfo fsi in fsis)
+                string[] ValidOSver =
                 {
-                    Script script = new Script
+                        "winxp",
+                        "win7",
+                        "win8",
+                        "win10"
+                };
+
+                Dictionary<string, int> structure = new Dictionary<string, int>();
+
+                // Find OSVer
+                for (int i = 0; i < dirLen; i++)
+                {
+                    if (ValidOSver.Contains(dirs[i]))
                     {
-                        Name = fsi.Name,
-                        FullName = fsi.FullName,
-                        Length = fsi.Length,
-                        Extension = fsi.Extension,
-                        CreationTime = fsi.CreationTime,
-                        CreationTimeUtc = fsi.CreationTimeUtc,
-                        LastWriteTime = fsi.LastWriteTime,
-                        LastWriteTimeUtc = fsi.LastWriteTimeUtc,
-                        LastAccessTime = fsi.LastAccessTime,
-                        LastAccessTimeUtc = fsi.LastAccessTimeUtc,
-                        Text = File.ReadAllText(fsi.FullName)
-                    };
-                    _scripts.Add(script);
+                        structure.Add("OSVer",i);
+                        break;
+                    }
                 }
 
-            }
-
-            return _scripts;
-        }
-        public bool LoadScripts(string[] dirs)
-        {
-
-            string filePath = Path.Combine(HttpContext.Current.Server.MapPath("~"), "PackageScripts.xml");
-            if (File.Exists(filePath))
-            {
-                Scripts = DeSerializeScripts<List<Script>>(filePath);
-
-                foreach (Script script in Scripts)
+                // Set PackageId
+                if(structure["OSVer"] + 2 < dirLen)
                 {
-                    SqliteDataAccess.SaveScript(script);
+                    structure.Add("PackageID", structure["OSVer"] + 2);
                 }
+
+                // Set Environment
+                string[] ValidEnv =
+                {
+                    "prod",
+                    "dev"
+                };
+                if (structure.ContainsKey("PackageID") && (structure["PackageID"] + 1 < dirLen))
+                {
+                    if (ValidEnv.Contains(dirs[structure["PackageID"] + 1]))
+                    {
+                        structure.Add("Environment", structure["PackageID"] + 1);
+                    }
+                }
+                else if (structure.ContainsKey("OSVer") && (structure["OSVer"] + 3 < dirLen))
+                {
+                    if ( ValidEnv.Contains(dirs[structure["OSVer"] + 3]) )
+                    { 
+                        structure.Add("Environment", structure["OSVer"] + 3);
+                    }
+                }
+                return structure;
             }
-            else
+
+            public string SetDirAtrribute(string attr,string[] dirs)
             {
-                SetDirectories(dirs);
-                Scripts = GetScripts();
-                SerializeScripts(Scripts, filePath);
+                switch (attr)
+                {
+                    case "PackageID":
+
+
+                    case "OSVer":
+                        string[] ValidValues =
+                        {
+                            "winxp",
+                            "win7",
+                            "win8",
+                            "win10"
+                        };
+                        string osVer = null;
+                        if (dirs.Count() > 5)
+                        {
+                            osVer = dirs[5];
+                        }
+                        if (!ValidValues.Contains(osVer))
+                        {
+                            foreach (string dir in dirs)
+                            {
+                                if (ValidValues.Contains(dir))
+                                {
+                                    return dir;
+                                }
+                            }
+                            return null;
+                        }
+                        return osVer;
+
+                    default:
+                        return null;
+                }
+           
             }
 
-            return true;
+
         }
 
-        JavaScriptSerializer jsonSerialiser = new JavaScriptSerializer() { MaxJsonLength = Int32.MaxValue };
+        // \\minerfiles.mst.edu\dfs\software\itwindist\win10\appdist\sccm_2012_drivers\20151030T152938_rename_mapping.pl
 
-        public string GetLoadedScriptsJSON()
+        public void LoadScripts(string[] dirs)
         {
-            return jsonSerialiser.Serialize(Scripts);
+
+            foreach (string dir in dirs)
+            {
+              //List<Package.Script> scripts = Package.Script.FindScripts(dir, 4);
+            }
         }
 
-        public List<Script> GetLoadedScripts()
+        public List<Package.Script> GetScripts()
         {
             return SqliteDataAccess.LoadScripts();
         }
