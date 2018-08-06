@@ -9,11 +9,47 @@ using System.Xml;
 using System.Xml.Serialization;
 
 using System.Web.Script.Serialization;
+using System.Configuration;
+using System.Data;
+using System.Data.SQLite;
+using Dapper;
 
 namespace MSTPackagingHub.Services
 {
     public class PackageScraperService : IPackageScraper
     {
+        private class SqliteDataAccess
+        {
+            public static List<Script> LoadScripts()
+            {
+                using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+                {
+                    var output = cnn.Query<Script>("select * from Script", new DynamicParameters());
+                    return output.ToList();
+                }
+            }
+
+            public static void SaveScript(Script script)
+            {
+                using (IDbConnection cnn = new SQLiteConnection(LoadConnectionString()))
+                {
+
+                    cnn.Execute(@"insert into Script 
+                                    (FullName, CreationTime, CreationTimeUtc, Extension, 
+                                    LastAccessTime, LastAccessTimeUtc, LastWriteTime, LastWriteTimeUtc, Length, Name, Text)
+                                values
+                                    (@FullName, @CreationTime, @CreationTimeUtc, @Extension, 
+                                    @LastAccessTime, @LastAccessTimeUtc, @LastWriteTime, @LastWriteTimeUtc, @Length, @Name, @Text)
+                    ", script);
+                }
+            }
+
+            private static string LoadConnectionString(string id = "Default")
+            {
+                return ConfigurationManager.ConnectionStrings[id].ConnectionString;
+            }
+        }
+        
         private void SerializeScripts<T>(T serializableObject, string fileName)
         {
             if (serializableObject == null) { return; }
@@ -149,15 +185,22 @@ namespace MSTPackagingHub.Services
 
             return _scripts;
         }
-        public bool LoadScripts()
+        public bool LoadScripts(string[] dirs)
         {
+
             string filePath = Path.Combine(HttpContext.Current.Server.MapPath("~"), "PackageScripts.xml");
             if (File.Exists(filePath))
             {
                 Scripts = DeSerializeScripts<List<Script>>(filePath);
+
+                foreach (Script script in Scripts)
+                {
+                    SqliteDataAccess.SaveScript(script);
+                }
             }
             else
             {
+                SetDirectories(dirs);
                 Scripts = GetScripts();
                 SerializeScripts(Scripts, filePath);
             }
@@ -174,7 +217,7 @@ namespace MSTPackagingHub.Services
 
         public List<Script> GetLoadedScripts()
         {
-            return Scripts;
+            return SqliteDataAccess.LoadScripts();
         }
 
     }

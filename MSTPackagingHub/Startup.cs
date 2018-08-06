@@ -69,21 +69,20 @@ namespace MSTPackagingHub
         public void ConfigureServices(IServiceCollection services)
         {
             PackageScraperService pScraper = new PackageScraperService();
-            pScraper.SetDirectories(new[] {
+            pScraper.LoadScripts(new[] {
                 "\\\\minerfiles.mst.edu\\dfs\\software\\itwindist\\win10"
             });
-            pScraper.LoadScripts();
             services.AddSingleton<IPackageScraper>(pScraper);
             services.AddControllersAsServices(typeof(Startup).Assembly.GetExportedTypes().Where(t => !t.IsAbstract && !t.IsGenericTypeDefinition).Where(t => typeof(IController).IsAssignableFrom(t) || t.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase)));
         }
 
         public void Configuration(IAppBuilder app)
         {
-            var services = new ServiceCollection();
+            ConfigureAuth(app);
 
+            var services = new ServiceCollection();
             ConfigureServices(services);
 
-            ConfigureAuth(app);
             var resolver = new DefaultDependencyResolver(services.BuildServiceProvider());
             DependencyResolver.SetResolver(resolver);
             GlobalConfiguration.Configuration.DependencyResolver = resolver;

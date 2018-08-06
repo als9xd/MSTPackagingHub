@@ -13,10 +13,12 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.8.6/showdown.min.js"></script>
     <script src="~/Scripts/highlight.pack.js"></script>
+    <script src="//cdn.datatables.net/plug-ins/1.10.12/sorting/datetime-moment.js"></script>
     <script>
         let converter = new showdown.Converter();
-        $('#scripts-table').DataTable
-            ({
+        $(document).ready(function () {
+            $.fn.dataTable.moment('dddd, MMMM Do, YYYY');
+            $('#scripts-table').DataTable({
                 "responsive": true,
                 "columnDefs": [
                     {
@@ -24,16 +26,29 @@
                         "targets": [0],
                     },
                     {
-                        "title": "FullName",
+                        "title": "Creation Time",
+                        "render": function (data, type, row) {
+                            return moment(data).format('dddd, MMMM Do, YYYY');
+                        },
                         "targets": [1]
                     },
                     {
-                        "title": "Text",
+                        "title": "Last Modified",
+                        "render": function (data, type, row) {
+                            return moment(data).format('dddd, MMMM Do, YYYY');
+                        },
+                        "targets": [2]
+                    },
+                    {
+                        "title": "Path",
+                    },
+                    {
+                        "title": "Contents",
                         "className": "script-text",
                         "render": function (data, type, row) {
                             return "<pre><code class='perl hljs'>" + data + "</code></pre>";
                         },
-                        "targets": [2],
+                        "targets": [4],
                     },
                 ],
                 "language":
@@ -42,16 +57,23 @@
                     },
                 "ajax":
                     {
-                        "url": "/api/Values",
+                        "url": "/api/Packages",
                         "type": "GET",
                         "dataType": "JSON",
                         "dataSrc": function (xmldata) {
+                            console.log(xmldata);
                             return xmldata;
                         }
                     },
                 "columns": [
                     {
                         "data": "Name"
+                    },
+                    {
+                        "data": "CreationTime"
+                    },
+                    {
+                        "data": "LastWriteTime"
                     },
                     {
                         "data": "FullName"
@@ -73,5 +95,6 @@
                     hljs.highlightBlock(block);
                 });
             });
+        });
     </script>
 }
