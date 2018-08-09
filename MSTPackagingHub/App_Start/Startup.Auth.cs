@@ -58,11 +58,11 @@ namespace MSTPackagingHub
             //   appId: "",
             //   appSecret: "");
 
-            //app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
-            //{
-            //    ClientId = "",
-            //    ClientSecret = ""
-            //});
+            app.UseGoogleAuthentication(new GoogleOAuth2AuthenticationOptions()
+            {
+               ClientId = "180393801311-qd00gjek4qrp0th3g5pvlfjvujr24m4i.apps.googleusercontent.com",
+               ClientSecret = "ERnyS9JVvWSs_4OkWEoknke4"
+            });
         }
     }
 }

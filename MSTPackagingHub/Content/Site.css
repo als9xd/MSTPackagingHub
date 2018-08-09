@@ -10,3 +10,19 @@
     white-space: pre-wrap;
 }
 
+
+.nav-link {
+    cursor: pointer;
+}
+
+p code, td code {
+    padding: 0.5em;
+    color: #333;
+    background: #f8f8f8;
+}
+
+.secondary-navbar {
+    font-size: 0.9rem;
+    padding: 0.1rem 1rem;
+   background-color: rgba(52,58,64,0.85)!important;
+}

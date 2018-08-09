@@ -1,0 +1,277 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.BodyContainerType = "container";
+}
+
+<div class="row mt-5">
+    <div class="col-md">
+        <h2>SCCM 2012 Admin Console</h2>
+        <ul>
+            <li>View Task Sequence Progresses</li>
+            <li>Add a InstallMonkey Package for Deployment</li>
+        </ul>
+        <div class="row">
+            <div class="col">
+                <a class="btn btn-sm  btn-default" data-toggle="modal" data-target="#sccm-console-doc" href="#">More Info &raquo;</a>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <a class="btn btn-sm btn-default" data-toggle="modal" data-target="#sccm-console-info" href="#">Config &raquo;</a>
+            </div>
+        </div>
+        <form method="get" action="~/ToolDownloads/AdminConsole.msi">
+            <button class="btn btn-dark"><i class="fa fa-download mr-1" aria-hidden="true"></i>Download</button>
+        </form>
+    </div>
+    <div class="col-md">
+        <h2>PSExec</h2>
+        <p>Use PSexec to run packages under the <code>System</code> account. This can be useful for debugging when script won't install during and <a href="/Home/InstallMonkey"><b>OS Deployment</b></a> or <a href="/Home/InstallMonkey"><b>Software Deployment</b></a>.</p>
+        <a class="btn btn-default" data-toggle="modal" data-target="#pstools-commands" href="#">More Info &raquo;</a>
+        <form method="get" action="~/ToolDownloads/PSTools.zip">
+            <button class="btn btn-dark"><i class="fa fa-download mr-1" aria-hidden="true"></i>Download</button>
+        </form>
+    </div>
+    <div class="col-md">
+        <h2>AutoIT</h2>
+        <p>AutoIT is a freeware automation language for Microsoft Windows. In the case where software is not able to be installed AutoIT can be used as a last resort.</p>
+        <a class="btn btn-default" data-toggle="modal" data-target="#autoit-modal" href="#">More Info &raquo;</a>
+        <form method="get" action="~/ToolDownloads/PSTools.zip.msi">
+            <button class="btn btn-dark"><i class="fa fa-download mr-1" aria-hidden="true"></i>Download</button>
+        </form>
+    </div>
+</div>
+<div class="row mt-3">
+    <div class="col-md">
+        <h2>Web Template Generator</h2>
+        <p>AutoIT is a freeware automation language for Microsoft Windows. In the case where software is not able to be installed AutoIT can be used as a last resort.</p>
+        <a class="btn btn-default" data-toggle="modal" data-target="#wtg-modal" href="#">More Info &raquo;</a>
+    </div>
+</div>
+
+
+<!-- SCCM Info-->
+<div class="modal fade" id="sccm-console-info" tabindex="-1" role="dialog" aria-labelledby="sccm-console-info" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="sccm-console-info-label">SCCM 2012 Admin Console</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-3">
+                            <b>Default Site Server</b>
+                        </div>
+                        <div class="col-8">
+                            <p><code>cmdesk-p1.srv.mst.edu</code></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <b>Software Packages Location</b>
+                        </div>
+                        <div class="col-9">
+                            <p><code>\Software Library\Overview\Application Management\Packages\Production Packages\Applications & Settings</code></p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-3">
+                            <b>Task Sequences Location</b>
+                        </div>
+                        <div class="col-9">
+                            <p><code>\Software Library\Overview\Operating Systems\Task Sequences\OS Deployment</code></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- SCCM Doc -->
+<div class="modal fade" id="sccm-console-doc" tabindex="-1" role="dialog" aria-labelledby="sccm-console-doc" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="sccm-console-doc-label">SCCM 2012 Add a Package</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col md-doc">
+                            @ViewBag.SCCMAddPackageDoc
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PSTools Modal-->
+<div class="modal fade" id="pstools-commands" tabindex="-1" role="dialog" aria-labelledby="pstools-commands" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="pstools-commands-label">SCCM 2012 Admin Console</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col md-doc">
+                            @ViewBag.PSToolsDoc
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- AutoIT Modal-->
+<div class="modal fade" id="autoit-modal" tabindex="-1" role="dialog" aria-labelledby="autoit-modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="autoit-modal-label">AutoIT</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col md-doc">
+                            @ViewBag.AutoITDoc
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- WTG Modal-->
+<div class="modal fade" id="wtg-modal" tabindex="-1" role="dialog" aria-labelledby="wtg-modal" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="wtg-modal-label">Web Template Generator</h3>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col md-doc">
+                            @ViewBag.WTGDoc
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section scripts {
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.8.6/showdown.min.js"></script>
+    <script src="~/Scripts/highlight.pack.js"></script>
+    <script>
+
+
+        showdown.extension('codehighlight', function () {
+            function htmlunencode(text) {
+                return (
+                    text
+                        .replace(/&amp;/g, '&')
+                        .replace(/\&amp;/g, '&')
+                        .replace(/&lt;/g, '<')
+                        .replace(/&gt;/g, '>')
+                );
+            }
+            return [
+                {
+                    type: 'output',
+                    filter: function (text, converter, options) {
+                        // use new shodown's regexp engine to conditionally parse codeblocks
+                        var left = '<pre><code\\b[^>]*>',
+                            right = '</code></pre>',
+                            flags = 'g',
+                            replacement = function (wholeMatch, match, left, right) {
+                                // unescape match to prevent double escaping
+                                match = htmlunencode(match);
+                                return left + hljs.highlightAuto(match).value + right;
+                            };
+                        return showdown.helper.replaceRecursiveRegExp(text, replacement, left, right, flags);
+                    }
+                }
+            ];
+        });
+        let converter = new showdown.Converter({
+            omitExtraWLInCodeBlocks: true,
+            ghCodeBlocks: true,
+            extensions: ['codehighlight']
+        });
+
+        converter.setFlavor('github');
+        $('.md-doc').each(function (i, el) {
+            let converted = converter.makeHtml($(el).html());
+            $(el).html(converted);
+            $(el).find('pre code').each(function (i, block) {
+                hljs.highlightBlock(block);
+            });
+        });
+
+        let offset_top;
+        function urlChanged() {
+            let split_url = location.href.split('#');
+            $('[href="#' + split_url[split_url.length - 1] + '"').on('click', function () {
+                urlChanged();
+            });
+            $(".modal.show").modal('hide');
+            let active_modal = $(".modal:has(#" + split_url[split_url.length - 1] + ")");
+            active_modal.modal('show').on("shown.bs.modal", function (event) {
+                setTimeout(function () {
+                    if (typeof offset_top === 'undefined') {
+                        offset_top = $("#" + split_url[split_url.length - 1]).offset().top;
+                    }
+                    active_modal.animate({ scrollTop: offset_top }, 'slow');
+                }, 300)
+            });
+
+        }
+
+        window.addEventListener("hashchange", urlChanged, false);
+        urlChanged();
+
+
+    </script>
+}

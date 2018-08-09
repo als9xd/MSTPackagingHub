@@ -1,0 +1,277 @@
+﻿
+@{
+    ViewBag.Title = "Analytics";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.BodyContainerType = "container";
+}
+
+@section secondaryNavbar{
+    <div class="navbar navbar-expand-lg navbar-dark bg-dark secondary-navbar">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <div class="nav-link chart-link active" onclick="buildAuthorsChart(this)">Authors</div>
+            </li>
+            <li class="nav-item">
+                <div class="nav-link chart-link" onclick="buildActivityChart(this)">Activity</div>
+            </li>
+        </ul>
+    </div>
+}
+
+<div class="row">
+    <div class="col-sm">
+
+        <div class="container">
+            <canvas id="authors-chart" style="position: relative; height: 50vh"></canvas>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script src="//cdn.datatables.net/plug-ins/1.10.12/sorting/datetime-moment.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+    <script>
+
+        function fillArray(value, len) {
+            var arr = [];
+            let c = 0;
+            for (var i = 0; i < len; i++) {
+                arr.push(value[c++]);
+                if (c > (value.length - 1)) {
+                    c = 0;
+                }
+            }
+            return arr;
+        }
+
+        let data;
+        let activeChart;
+
+        let buildAuthorsChartData;
+        let background_colors = [
+            'rgba(255, 99, 132, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(255, 159, 64, 0.2)'
+        ];
+
+        let border_colors = [
+            'rgba(255,99,132,1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+        ];
+
+        function buildAuthorsChart(el) {
+            if (typeof el !== 'undefined') {
+                $('.chart-link').removeClass('active');
+                el.classList.add('active');
+            }
+
+            if (typeof activeChart !== 'undefined') {
+                activeChart.destroy();
+            }
+
+            if (typeof buildAuthorsChartData === 'undefined') {
+
+                let authors = {};
+                for (let i = 0; i < data.length; i++) {
+                    let a_s = data[i].Authors.split(',');
+                    for (let a = 0; a < a_s.length; a++) {
+                        a_s[a] = a_s[a].trim();
+                        if (typeof authors[a_s[a]] === 'undefined') {
+                            if (a_s[a] !== "") {
+                                authors[a_s[a]] = 1;
+                            }
+                        } else {
+                            authors[a_s[a]]++;
+                        }
+
+                    }
+
+                }
+                let authorNames = [];
+                let authorValues = [];
+                Array.prototype.insert = function (index, item) {
+                    this.splice(index, 0, item);
+                };
+
+                for (let name in authors) {
+                    if (authorNames.length === 0) {
+                        authorNames.insert(0, name);
+                        authorValues.insert(0, authors[name]);
+                    } else {
+                        let nameSet = false;
+                        for (let i = 0; i < authorNames.length && !nameSet; i++) {
+                            if (name.toLowerCase() < authorNames[i].toLowerCase()) {
+                                authorNames.insert(i, name);
+                                authorValues.insert(i, authors[name]);
+                                nameSet = true;
+                            }
+                        }
+                        if (!nameSet) {
+                            let i = authorNames.length;
+                            authorNames.insert(i, name);
+                            authorValues.insert(i, authors[name]);
+                        }
+                    }
+
+                }
+
+                buildAuthorsChartData = {
+                    authorNames: authorNames,
+                    authorValues: authorValues
+                }
+            }
+
+            activeChart = new Chart(ctx, {
+                responsive: true,
+                maintainAspectRatio: false,
+                type: 'bar',
+                data: {
+                    labels: buildAuthorsChartData.authorNames,
+                    datasets: [{
+                        label: '# of scripts',
+                        data: buildAuthorsChartData.authorValues,
+                        backgroundColor: fillArray(background_colors, buildAuthorsChartData.authorNames.length),
+                        borderColor: fillArray(border_colors, buildAuthorsChartData.authorNames.length),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    legend: {
+                        display: false
+                    },
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                fontColor: "#fff",
+                                beginAtZero: true,
+                            }
+                        }],
+                        xAxes: [{
+                            ticks: {
+                                fontColor: "#fff"
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+        var ctx = document.getElementById("authors-chart").getContext('2d');
+
+        let activityChartData;
+
+        let buildActivityChart = function (el) {
+            if (typeof el !== 'undefined') {
+                $('.chart-link').removeClass('active');
+                el.classList.add('active');
+            }
+            activeChart.destroy();
+
+            if (typeof activityChartData === 'undefined') {
+                let creation_dates = [];
+                for (let i = 0; i < data.length; i++) {
+                    creation_dates.push(moment.unix(data[i].CreationTime));
+                }
+
+                let activity_counter = [];
+
+                var timeFormat = 'MM/DD/YYYY HH:mm';
+
+                function newDate(days) {
+                    return moment().subtract(days * 30, 'd').toDate();
+                }
+
+                function newDateString(days) {
+                    return moment().subtract(days * 30, 'd').format(timeFormat);
+                }
+
+                let temp = {};
+
+                for (let i = 0; i < creation_dates.length; i++) {
+                    creation_dates[i] = new Date(creation_dates[i]).toDateString();
+                }
+
+                for (let i = 0; i < creation_dates.length; i++) {
+                    if (typeof temp[creation_dates[i]] === 'undefined') {
+                        temp[creation_dates[i]] = 1;
+                    } else {
+                        temp[creation_dates[i]]++;
+                    }
+                }
+
+                for (let x in temp) {
+                    if (new Date(x).getFullYear() >= 2017) {
+                        activity_counter.push({
+                            y: temp[x],
+                            x: x
+                        });
+                    }
+                }
+
+                activity_counter.sort(
+                    function (a, b) {
+                        return new Date(b.x) - new Date(a.x);
+                    }
+                );
+                activityChartData = activity_counter;
+            }
+            activeChart = new Chart(ctx, {
+                responsive: true,
+                maintainAspectRatio: false,
+                type: 'line',
+                data: {
+                    datasets: [{
+                        label: 'new scripts',
+                        data: activityChartData,
+                        borderColor: 'green',
+                    }]
+                },
+                options: {
+                    legend: {
+                        display: false
+                    },
+                    elements: {
+                        line: {
+                            tension: 0
+                        }
+                    },
+                    title: {
+                        text: 'Chart.js Time Scale'
+                    },
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Date'
+                            }
+                        }],
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'new scripts'
+                            }
+                        }]
+                    },
+                }
+            });
+
+        }
+
+        $.ajax({
+            url: "/api/Packages", success: function (results) {
+                data = results;
+                buildAuthorsChart();
+
+
+            }
+        });
+
+    </script>
+}

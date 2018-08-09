@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using System.Threading;
 
 [assembly: OwinStartupAttribute(typeof(MSTPackagingHub.Startup))]
 namespace MSTPackagingHub
@@ -69,11 +70,16 @@ namespace MSTPackagingHub
         public void ConfigureServices(IServiceCollection services)
         {
             PackageScraperService pScraper = new PackageScraperService();
-            pScraper.LoadScripts(new[] {
-                "\\\\minerfiles.mst.edu\\dfs\\software\\itwindist\\win10"
+
+            Thread t = new Thread(new ParameterizedThreadStart(pScraper.LoadScripts));
+            t.Start(new[] {
+                "\\\\minerfiles.mst.edu\\dfs\\software\\itwindist\\win7",
+                "\\\\minerfiles.mst.edu\\dfs\\software\\itwindist\\win8",
+                "\\\\minerfiles.mst.edu\\dfs\\software\\itwindist\\win10",
             });
+
             services.AddSingleton<IPackageScraper>(pScraper);
-            services.AddControllersAsServices(typeof(Startup).Assembly.GetExportedTypes().Where(t => !t.IsAbstract && !t.IsGenericTypeDefinition).Where(t => typeof(IController).IsAssignableFrom(t) || t.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase)));
+            services.AddControllersAsServices(typeof(Startup).Assembly.GetExportedTypes().Where(o => !o.IsAbstract && !o.IsGenericTypeDefinition).Where(o => typeof(IController).IsAssignableFrom(o) || o.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase)));
         }
 
         public void Configuration(IAppBuilder app)

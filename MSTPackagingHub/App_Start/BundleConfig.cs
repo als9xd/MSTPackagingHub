@@ -24,7 +24,8 @@ namespace MSTPackagingHub
                       "~/Scripts/DataTables/jquery.dataTables.min.js",
                       "~/Scripts/DataTables/dataTables.bootstrap4.min.js",
                       "~/Scripts/DataTables/dataTables.responsive.min.js",
-                      "~/Scripts/DataTables/responsive.bootstrap4.min.js"
+                      "~/Scripts/DataTables/responsive.bootstrap4.min.js",
+                      "~/Scripts/bootstrap.min.js"
                       ));
 
             bundles.Add(new StyleBundle("~/Content/css").Include(
@@ -32,6 +33,7 @@ namespace MSTPackagingHub
                       "~/Content/Datatables/dataTables.bootstrap4.min.css",
                       "~/Content/Datatables/responsive.bootstrap4.min.css",
                       "~/Content/highlight/github.css",
+                      "~/Content/font-awesome.min.css",
                       "~/Content/site.css"));
         }
     }

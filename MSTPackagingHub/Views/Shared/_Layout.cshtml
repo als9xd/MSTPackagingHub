@@ -6,11 +6,16 @@
     <title>@ViewBag.Title - MST Package Auditor</title>
     @Styles.Render("~/Content/css")
     @Scripts.Render("~/bundles/modernizr")
+    <link rel="stylesheet" href="https://unpkg.com/nprogress@0.2.0/nprogress.css">
+    <script src="https://unpkg.com/nprogress@0.2.0/nprogress.js"></script>
 
 </head>
 <body>
-    <div class="navbar navbar-expand-lg navbar-light bg-light mb-3">
-        @Html.ActionLink("MST Packaging Hub", "Index", "Home", null, new { @class = "navbar-brand" })
+    <div class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="@Url.Action("Index","Home")">
+            <img src="/favicon.ico" width="30" height="30" class="d-inline-block align-top" alt="">
+            MST Packaging Hub
+        </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -21,25 +26,39 @@
                     @Html.ActionLink("Audit", "Audit", "Home", null, new { @class = $"nav-link {(@ViewBag.ActiveTab == "Audit" ? "active" : "")}" })
                 </li>
                 <li class="nav-item">
-                    @Html.ActionLink("Regex", "Regex", "Home", null, new { @class = $"nav-link {(@ViewBag.ActiveTab == "Regex" ? "active" : "")}" })
+                    @Html.ActionLink("Analytics", "Analytics", "Home", null, new { @class = $"nav-link {(@ViewBag.ActiveTab == "Analytics" ? "active" : "")}" })
+                </li>
+                <li class="nav-item">
+                    @Html.ActionLink("Install Monkey", "InstallMonkey", "Home", null, new { @class = $"nav-link {(@ViewBag.ActiveTab == "InstallMonkey" ? "active" : "")}" })
+                </li>
+                <li class="nav-item">
+                    @Html.ActionLink("Tools", "Tools", "Home", null, new { @class = $"nav-link {(@ViewBag.ActiveTab == "Tools" ? "active" : "")}" })
+                </li>
+                <li class="nav-item">
+                    @Html.ActionLink("Links", "Links", "Home", null, new { @class = $"nav-link {(@ViewBag.ActiveTab == "Links" ? "active" : "")}" })
                 </li>
             </ul>
-            <form class="form-inline my-2 my-lg-0">
-                <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
-            </form>
+            @Html.Partial("_LoginPartial")
         </div>
     </div>
-    <div class="container-fluid">
+    @RenderSection("secondaryNavbar", required: false)
+    <div class="@ViewBag.BodyContainerType mt-3">
         @RenderBody()
         <hr />
         <footer>
-            <p>&copy; @DateTime.Now.Year - My ASP.NET Application</p>
+            <p>&copy; @DateTime.Now.Year - MST Packaging Hub</p>
         </footer>
     </div>
-
+    <script>
+        NProgress.configure({ showSpinner: false });
+        NProgress.start();
+    </script>
     @Scripts.Render("~/bundles/jquery")
     @Scripts.Render("~/bundles/bootstrap")
     @RenderSection("scripts", required: false)
+    <script>
+        NProgress.done();
+    </script>
+
 </body>
 </html>

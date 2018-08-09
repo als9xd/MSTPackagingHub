@@ -102,6 +102,12 @@
     <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="NodaTime, Version=2.0.0.0, Culture=neutral, PublicKeyToken=4226afe0d9b296d1, processorArchitecture=MSIL">
+      <HintPath>..\packages\NodaTime.2.0.0\lib\net45\NodaTime.dll</HintPath>
+    </Reference>
+    <Reference Include="NodaTime.Serialization.JsonNet, Version=2.0.0.0, Culture=neutral, PublicKeyToken=4226afe0d9b296d1, processorArchitecture=MSIL">
+      <HintPath>..\packages\NodaTime.Serialization.JsonNet.2.0.0\lib\net45\NodaTime.Serialization.JsonNet.dll</HintPath>
+    </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <HintPath>..\packages\Owin.1.0\lib\net40\Owin.dll</HintPath>
     </Reference>
@@ -432,6 +438,8 @@
     <Content Include="Content\DataTables\jquery.dataTables.min.css" />
     <Content Include="Content\DataTables\jquery.dataTables_themeroller.css" />
     <Content Include="Content\DataTables\swf\flashExport.swf" />
+    <Content Include="Content\font-awesome.css" />
+    <Content Include="Content\font-awesome.min.css" />
     <Content Include="Content\highlight\agate.css" />
     <Content Include="Content\highlight\androidstudio.css" />
     <Content Include="Content\highlight\arduino-light.css" />
@@ -521,7 +529,7 @@
     <Content Include="Content\images\sort_desc.png" />
     <Content Include="Content\images\sort_desc_disabled.png" />
     <Content Include="Content\DataTables\responsive.bootstrap4.min.css" />
-    <Content Include="favicon.ico" />
+    <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
     <Content Include="Scripts\bootstrap.bundle.js" />
@@ -635,6 +643,11 @@
     </Content>
     <Content Include="CSV_Database_of_First_Names.csv" />
     <Content Include="db_backup\PackageScripts.db" />
+    <Content Include="fonts\FontAwesome.otf" />
+    <Content Include="fonts\fontawesome-webfont.woff2" />
+    <Content Include="fonts\fontawesome-webfont.woff" />
+    <Content Include="fonts\fontawesome-webfont.ttf" />
+    <Content Include="fonts\fontawesome-webfont.eot" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery-3.3.1.min.js" />
@@ -657,6 +670,19 @@
     <Content Include="Scripts\umd\popper-utils.min.js" />
     <Content Include="Scripts\umd\popper.js" />
     <Content Include="Scripts\umd\popper.min.js" />
+    <Content Include="Content\images\ToolsDocs\adddistributionpoint.png" />
+    <Content Include="ToolsDocs\AutoIT.md" />
+    <Content Include="Content\images\ToolsDocs\browseforsourcefiles.png" />
+    <Content Include="Content\images\ToolsDocs\createprogramsccm2012.png" />
+    <Content Include="Content\images\ToolsDocs\deploy-addgroup.png" />
+    <Content Include="Content\images\ToolsDocs\deploy-general.png" />
+    <Content Include="Content\images\ToolsDocs\deploy-selectcollection.png" />
+    <Content Include="Content\images\ToolsDocs\deploy-selectgroup.png" />
+    <Content Include="Content\images\ToolsDocs\deploy-settings.png" />
+    <Content Include="Content\images\ToolsDocs\distributecontent-general.png" />
+    <Content Include="Content\images\ToolsDocs\programinformation.png" />
+    <Content Include="Content\images\ToolsDocs\programrequirements.png" />
+    <Content Include="Content\images\ToolsDocs\selectdistributiongroup.png" />
     <Content Include="Web.config" />
     <Content Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
@@ -664,12 +690,14 @@
     <Content Include="Web.Release.config">
       <DependentUpon>Web.config</DependentUpon>
     </Content>
-    <Content Include="Views\Web.config" />
+    <Content Include="Views\Web.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="Views\_ViewStart.cshtml" />
     <Content Include="Views\Shared\Error.cshtml" />
     <Content Include="Views\Shared\_Layout.cshtml" />
     <Content Include="Views\Home\Audit.cshtml" />
-    <Content Include="Views\Home\Regex.cshtml" />
+    <Content Include="Views\Home\Analytics.cshtml" />
     <Content Include="Views\Home\Index.cshtml" />
     <Content Include="Views\Account\_ExternalLoginsListPartial.cshtml" />
     <Content Include="Views\Account\ConfirmEmail.cshtml" />
@@ -700,6 +728,10 @@
     <Content Include="Scripts\popper.js.map" />
     <Content Include="Scripts\popper-utils.min.js.map" />
     <Content Include="Scripts\popper-utils.js.map" />
+    <Content Include="Views\Home\InstallMonkey.cshtml" />
+    <Content Include="Views\Home\Tools.cshtml" />
+    <Content Include="ToolsDocs\SCCMAddPackage.md" />
+    <Content Include="Views\Home\Links.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

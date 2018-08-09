@@ -1,0 +1,115 @@
+﻿
+@{
+    ViewBag.Title = "InstallMonkey";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewBag.BodyContainerType = "container";
+}
+
+@section secondaryNavbar{
+    <div class="navbar navbar-expand-lg navbar-dark bg-dark secondary-navbar">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                @Html.ActionLink("Quick Start", "InstallMonkey", "Home", new { id = 0 }, new { @class = $"nav-link {(@ViewBag.ActiveTab == "Tutorial" ? "active" : "")}" })
+            </li>
+            <li class="nav-item">
+                @Html.ActionLink("Template", "InstallMonkey", "Home", new { id = 1 }, new { @class = $"nav-link {(@ViewBag.ActiveTab == "Template" ? "active" : "")}" })
+            </li>
+            <li class="nav-item">
+                @Html.ActionLink("Documentation", "InstallMonkey", "Home", new { id = 2 }, new { @class = $"nav-link {(@ViewBag.ActiveTab == "Documentation" ? "active" : "")}" })
+            </li>
+        </ul>
+    </div>
+}
+
+<div class="row">
+    <div class="col-sm">
+
+        <div class="container">
+            <div class="@ViewBag.DocType" id="im-doc">
+                <h3 class="text-center">Loading... </h3>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="temp-im-doc" style="display:none;">
+@ViewBag.Document
+</div>
+
+@section scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.8.6/showdown.min.js"></script>
+    <script src="~/Scripts/highlight.pack.js"></script>
+    <script>
+
+        showdown.extension('btTable', function () {
+            return [{
+                type: "output",
+                filter: function (html, converter, options) {
+                    // parse the html string
+                    var liveHtml = $('<div></div>').html(html);
+                    $('table', liveHtml).each(function () {
+                        var table = $(this);
+                        // table bootstrap classes
+                        table.addClass('table table-sriped table-bordered')
+                            // make table responsive
+                            .wrap('<div class="class table-responsive"></div>');
+                    });
+                    return liveHtml.html();
+                }
+            }];
+        });
+
+        switch ("@ViewBag.DocType") {
+            case "markdown":
+                showdown.extension('codehighlight', function () {
+                    function htmlunencode(text) {
+                        return (
+                            text
+                                .replace(/&amp;/g, '&')
+                                .replace(/\&amp;/g, '&')
+                                .replace(/&lt;/g, '<')
+                                .replace(/&gt;/g, '>')
+                        );
+                    }
+                    return [
+                        {
+                            type: 'output',
+                            filter: function (text, converter, options) {
+                                // use new shodown's regexp engine to conditionally parse codeblocks
+                                var left = '<pre><code\\b[^>]*>',
+                                    right = '</code></pre>',
+                                    flags = 'g',
+                                    replacement = function (wholeMatch, match, left, right) {
+                                        // unescape match to prevent double escaping
+                                        match = htmlunencode(match);
+                                        return left + hljs.highlightAuto(match).value + right;
+                                    };
+                                return showdown.helper.replaceRecursiveRegExp(text, replacement, left, right, flags);
+                            }
+                        }
+                    ];
+                });
+                let converter = new showdown.Converter({
+                    omitExtraWLInCodeBlocks: true,
+                    ghCodeBlocks: true,
+                    extensions: ['btTable','codehighlight']
+                });
+
+                converter.setFlavor('github');
+                let converted = converter.makeHtml($('#temp-im-doc').html());
+                $('#im-doc').html(converted);
+                break;
+            case "perl":
+                $('#im-doc').html("<pre><code class='hljs perl'>" + $('#temp-im-doc').html()+"</code></pre>");
+                break;
+
+        }
+        $(document).find('pre code').each(function (i, block) {
+            hljs.highlightBlock(block);
+        });
+
+
+
+    </script>
+}
